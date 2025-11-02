@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+build/
+develop-eggs/
+dist/
+eggs/
+*.egg-info/
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+.env
+
+db.sqlite3
+
+# Editor/IDE specific
+.vscode/        # VSCode settings
+.idea/          # IntelliJ/PyCharm settings
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
