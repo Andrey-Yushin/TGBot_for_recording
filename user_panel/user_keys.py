@@ -19,7 +19,7 @@ main_user_keys = ReplyKeyboardMarkup(keyboard=[
 
 categories_user_keys = ReplyKeyboardMarkup(keyboard=[
     [KeyboardButton(text='Женские 💇‍♀️'), KeyboardButton(text='Мужские 💇‍♂️')],
-    [KeyboardButton(text='Детские 👶'), KeyboardButton(text='Общие 👨‍👩‍👦')],
+    [KeyboardButton(text='Детские 👶')],
     [KeyboardButton(text='На главную ↪️')]
 ],
     resize_keyboard=True, #  Меняем размер кнопок.

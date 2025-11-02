@@ -68,6 +68,12 @@ async def services(message: Message):
     await message.answer('Выберите для кого услуга', reply_markup=uskey.categories_user_keys)
 
 
+@user_router.message(F.text.lower() == 'общие 👨‍👩‍👦')
+async def females(message: Message):
+    await message.answer('Общие',
+                         reply_markup=await uskey.general_categories())
+
+
 @user_router.message(F.text.lower() == 'женские 💇‍♀️')
 async def females(message: Message):
     await message.answer('Для женщин', reply_markup=await uskey.female_categories())

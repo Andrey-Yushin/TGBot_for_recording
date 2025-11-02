@@ -73,6 +73,25 @@ class ChildItem(Base):
     time: Mapped[str] = mapped_column(String(16))          # Время выполнениея услуги.
     category: Mapped[int] = mapped_column(ForeignKey('child_categories.id'))  # Категоия услуги.
 
+
+class GeneralCategory(Base):
+    __tablename__ = 'general_categories'
+
+    id: Mapped[int] = mapped_column(primary_key=True)  # id категории услуг.
+    name: Mapped[str] = mapped_column(String(30))      # Название категории услуг.
+
+
+class GeneralItem(Base):
+    __tablename__ = 'general_items'  # Название столбца
+
+    id: Mapped[int] = mapped_column(primary_key=True)      # id услуги.
+    name: Mapped[str] = mapped_column(String(30))          # Название услуги.
+    description: Mapped[str] = mapped_column(String(100))  # Описание услуги.
+    price: Mapped[str] = mapped_column(String(16))         # Цена услуги.
+    time: Mapped[str] = mapped_column(String(16))          # Время выполнениея услуги.
+    category: Mapped[int] = mapped_column(ForeignKey('child_categories.id'))  # Категоия услуги.
+
+
 async def async_main():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)  # Создаем все таблицы.
