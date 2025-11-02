@@ -52,79 +52,123 @@ async def cmd_start(message: Message):
     await message.answer('Привет!', reply_markup=uskey.main_user_keys)
 
 
-@user_router.message(F.text.lower() == 'на главную')
-async def show_info(message: Message):
+@user_router.message(F.text.lower() == 'на главную ↪️')
+async def to_main(message: Message):
     await message.answer(main_text, reply_markup=uskey.main_user_keys)
 
 
 
-@user_router.message(F.text.lower() == 'мой профиль')
-async def show_info(message: Message):
+@user_router.message(F.text.lower() == 'мой профиль 👤')
+async def profile(message: Message):
     await message.answer('Мой профиль')
 
 
-@user_router.message(F.text.lower() == 'услуги')
-async def show_info(message: Message):
+@user_router.message(F.text.lower() == 'услуги 🛒')
+async def services(message: Message):
     await message.answer('Выберите для кого услуга', reply_markup=uskey.categories_user_keys)
 
 
-@user_router.message(F.text.lower() == 'женские')
-async def show_info(message: Message):
+@user_router.message(F.text.lower() == 'женские 💇‍♀️')
+async def females(message: Message):
     await message.answer('Для женщин', reply_markup=await uskey.female_categories())
 
-@user_router.callback_query(F.data.startswith('female_category_') or F.data.startswith('to_female_categories'))
+@user_router.callback_query(F.data.startswith('to_female_categories'))
+async def back_to_female_categories(callback: CallbackQuery):
+    await callback.answer()  # Заглушка для кнопки.
+    await callback.message.edit_text('Для женщин',
+                                  reply_markup=await uskey.female_categories())
+
+
+@user_router.callback_query(F.data.startswith('female_category_'))
 async def female_category(callback: CallbackQuery):
-    await callback.message.answer('Выберите услуги',
+    await callback.answer()  # Заглушка для кнопки.
+    await callback.message.edit_text('Выберите услугу',
                                   reply_markup=await uskey.female_items(callback.data.split('_')[2]))
+
 
 @user_router.callback_query(F.data.startswith('female_item_'))
 async def female_category(callback: CallbackQuery):
     item_data = await rq.get_female_item(callback.data.split('_')[2])
-    await callback.message.answer(f'Услуга: {item_data.name}\n{item_data.description}\n'
-                                  f'Время: {item_data.time}\nЦена: {item_data.price}',
-                                  reply_markup=uskey.female_keys)
+    await callback.answer()  # Заглушка для кнопки.
+    if item_data.description == 'Пусто':  # Пустое описание не выводить.
+        await callback.message.edit_text(f'💇‍♀️ Услуга: {item_data.name}\n'
+                                      f'🕒 Время: {item_data.time}\n💳 Цена: {item_data.price}',
+                                      reply_markup=uskey.female_keys)
+    else:
+        await callback.message.edit_text(f'💇‍♀️ Услуга: {item_data.name}\n📝{item_data.description}\n'
+                                      f'🕒 Время: {item_data.time}\n💳 Цена: {item_data.price}',
+                                      reply_markup=uskey.female_keys)
 
 
-@user_router.message(F.text.lower() == 'мужские')
-async def show_info(message: Message):
+@user_router.message(F.text.lower() == 'мужские 💇‍♂️')
+async def males(message: Message):
     await message.answer('Для мужчин', reply_markup=await uskey.male_categories())
+
+@user_router.callback_query(F.data.startswith('to_male_categories'))
+async def back_to_male_categories(callback: CallbackQuery):
+    await callback.answer()  # Заглушка для кнопки.
+    await callback.message.edit_text('Для мужчин',
+                                  reply_markup=await uskey.male_categories())
 
 
 @user_router.callback_query(F.data.startswith('male_category_'))
 async def male_category(callback: CallbackQuery):
-    await callback.message.answer('Выберите услугу',
+    await callback.answer()  # Заглушка для кнопки.
+    await callback.message.edit_text('Выберите услугу',
                                   reply_markup=await uskey.male_items(callback.data.split('_')[2]))
+
 
 @user_router.callback_query(F.data.startswith('male_item_'))
 async def male_category(callback: CallbackQuery):
     item_data = await rq.get_male_item(callback.data.split('_')[2])
-    await callback.message.answer(f'Услуга: {item_data.name}\n{item_data.description}\n'
-                                  f'Время: {item_data.time}\nЦена: {item_data.price}',
-                                  reply_markup=uskey.male_keys)
+    await callback.answer()  # Заглушка для кнопки.
+    if item_data.description == 'Пусто':  # Пустое описание не выводить.
+        await callback.message.edit_text(f'💇‍♂️ Услуга: {item_data.name}\n'
+                                      f'🕒 Время: {item_data.time}\n💳 Цена: {item_data.price}',
+                                      reply_markup=uskey.male_keys)
+    else:
+        await callback.message.edit_text(f'💇‍♂️ Услуга: {item_data.name}\n📝 {item_data.description}\n'
+                                      f'🕒 Время: {item_data.time}\n💳 Цена: {item_data.price}',
+                                      reply_markup=uskey.male_keys)
 
 
-@user_router.message(F.text.lower() == 'детские')
-async def show_info(message: Message):
+@user_router.message(F.text.lower() == 'детские 💇')
+async def childish(message: Message):
     await message.answer('Для детей', reply_markup=await uskey.child_categories())
+
+@user_router.callback_query(F.data.startswith('to_child_categories'))
+async def back_to_child_categories(callback: CallbackQuery):
+    await callback.answer()  # Заглушка для кнопки.
+    await callback.message.edit_text('Для детей',
+                                  reply_markup=await uskey.child_categories())
+
 
 @user_router.callback_query(F.data.startswith('child_category_'))
 async def child_category(callback: CallbackQuery):
-    await callback.message.answer('Выберите услугу',
+    await callback.answer()  # Заглушка для кнопки.
+    await callback.message.edit_text('Выберите услугу',
                                   reply_markup=await uskey.child_items(callback.data.split('_')[2]))
+
 
 @user_router.callback_query(F.data.startswith('child_item_'))
 async def child_category(callback: CallbackQuery):
     item_data = await rq.get_child_item(callback.data.split('_')[2])
-    await callback.message.answer(f'Услуга: {item_data.name}\n{item_data.description}\n'
-                                  f'Время: {item_data.time}\nЦена: {item_data.price}',
-                                  reply_markup=uskey.child_keys)
+    await callback.answer()  # Заглушка для кнопки.
+    if item_data.description == 'Пусто':  # Пустое описание не выводить.
+        await callback.message.edit_text(f'💇 Услуга: {item_data.name}\n'
+                                      f'🕒 Время: {item_data.time}\n💳 Цена: {item_data.price}',
+                                      reply_markup=uskey.male_keys)
+    else:
+        await callback.message.edit_text(f'💇 Услуга: {item_data.name}\n📝 {item_data.description}\n'
+                                      f'🕒 Время: {item_data.time}\n💳 Цена: {item_data.price}',
+                                      reply_markup=uskey.male_keys)
 
 
-@user_router.message(F.text.lower() == 'акции')
-async def show_info(message: Message):
+@user_router.message(F.text.lower() == 'акции 🎁')
+async def events(message: Message):
     await message.answer('Акции')
 
 
-@user_router.message(F.text.lower() == 'информация')
+@user_router.message(F.text.lower() == 'информация ℹ️')
 async def show_info(message: Message):
     await message.answer(info_string, reply_markup=uskey.info_keys)

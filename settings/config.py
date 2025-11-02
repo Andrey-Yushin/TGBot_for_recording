@@ -10,7 +10,7 @@ YANDEX_MAPS = os.getenv('YANDEX_MAPS')
 TWOGIS = os.getenv('TWOGIS')
 
 main_text = (
-    'Основной текст главного меню...'
+    'Главное меню.'
 )
 
 info_string = (
