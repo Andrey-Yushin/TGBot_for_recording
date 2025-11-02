@@ -11,7 +11,7 @@ async def set_user(tg_id):
         user = await session.scalar(select(User).where(User.tg_id == tg_id))  # Запрашиваем id клиента.
 
         if not user:  # Добавляем клиента в базу, если его там нет.
-            session.add(User(tg_id=tg_id))  # Добавляем id клиента в базу.
+            session.add(User(tg_id=tg_id, name=None, phone=None))  # Добавляем id клиента в базу.
             await session.commit()  # Сохраняем id клиента в базе.
 
 

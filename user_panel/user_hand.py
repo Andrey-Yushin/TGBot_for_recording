@@ -132,7 +132,7 @@ async def male_category(callback: CallbackQuery):
                                       reply_markup=uskey.male_keys)
 
 
-@user_router.message(F.text.lower() == 'детские 💇')
+@user_router.message(F.text.lower() == 'детские 👶')
 async def childish(message: Message):
     await message.answer('Для детей', reply_markup=await uskey.child_categories())
 

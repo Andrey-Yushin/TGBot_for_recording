@@ -17,8 +17,8 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)  # id услуги.
     tg_id = mapped_column(BigInteger)                  # Телеграмм id.
-    name: Mapped[str] = mapped_column(String(50))      # Имя клиента.
-    phone: Mapped[str] = mapped_column(String(11))     # Номер телефона.
+    name: Mapped[str] = mapped_column(String(50), nullable=True)  # Имя клиента.
+    phone: Mapped[str] = mapped_column(String(11), nullable=True)  # Номер телефона.
 
 
 class FemaleCategory(Base):
