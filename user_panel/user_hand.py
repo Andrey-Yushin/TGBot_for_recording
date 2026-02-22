@@ -339,13 +339,13 @@ async def save_service(message: Message, state: FSMContext):
     # Получаем полную информацию об услуге по сохраненному ID
     if data['gender'] == 'female':
         item_data = await rq.get_female_item(data['item_id'])
-        category = await rq.get_female_category(item_data.id)
+        category = await rq.get_female_category(item_data.category)
     elif data['gender'] == 'male':
         item_data = await rq.get_male_item(data['item_id'])
-        category = await rq.get_male_category(item_data.id)
+        category = await rq.get_male_category(item_data.category)
     elif data['gender'] == 'child':
         item_data = await rq.get_child_item(data['item_id'])
-        category = await rq.get_child_category(item_data.id)
+        category = await rq.get_child_category(item_data.category)
 
     # Получаем информацию о пользователе
     user_info = await rq.get_user_info(tg_id)
@@ -377,12 +377,16 @@ async def skip_comment(callback: CallbackQuery, state: FSMContext):
     tg_id = callback.from_user.id
     user_info = await rq.get_user_info(tg_id)
 
+    # Получаем полную информацию об услуге по сохраненному ID
     if data['gender'] == 'female':
-        category = await rq.get_female_category(data['item_id'])
+        item_data = await rq.get_female_item(data['item_id'])
+        category = await rq.get_female_category(item_data.category)
     elif data['gender'] == 'male':
-        category = await rq.get_male_category(data['item_id'])
+        item_data = await rq.get_male_item(data['item_id'])
+        category = await rq.get_male_category(item_data.category)
     elif data['gender'] == 'child':
-        category = await rq.get_child_category(data['item_id'])
+        item_data = await rq.get_child_item(data['item_id'])
+        category = await rq.get_child_category(item_data.category)
 
     # Сохраняем запись в БД с пустым комментарием
     await rq.add_service(
