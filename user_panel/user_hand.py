@@ -195,11 +195,19 @@ async def show_service(callback: CallbackQuery):
 @user_router.callback_query(F.data.startswith('delete_service_'))
 async def delete_user_service(callback: CallbackQuery):
     """Удаляет услугу клиента."""
+    tg_id = callback.from_user.id
     service_id = callback.data.split('_')[2]
+
     await rq.delete_service(service_id)  # Удаляем услугу клиента из базы.
     await callback.answer()  # Заглушка для кнопки.
-    await callback.message.edit_text('Запись удалена')
     await callback.message.delete()  # Удаляем сообщение.
+
+    list_service = await rq.get_user_services(tg_id)
+    if len(list_service.all()) == 0:
+        await callback.message.answer('Ваш список услуг пуст 📋')
+        return
+    await callback.message.answer('Список услуг 📋',
+                    reply_markup=await uskey.user_services(tg_id))
 
 
 @user_router.message(F.text.lower() == 'женские 💇‍♀️')
