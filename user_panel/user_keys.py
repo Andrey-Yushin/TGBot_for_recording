@@ -9,6 +9,7 @@ from database.requests import (get_female_categories, get_female_items,
                                get_child_categories, get_child_items,
                                get_user_services)
 
+
 main_user_keys = ReplyKeyboardMarkup(keyboard=[
     [KeyboardButton(text='Акции 🎁'),
      KeyboardButton(text='Услуги 🛒')],
@@ -18,6 +19,7 @@ main_user_keys = ReplyKeyboardMarkup(keyboard=[
     resize_keyboard=True, #  Меняем размер кнопок.
     input_field_placeholder='Выберите пункт меню...'  # Подставляем placeholder.
 )
+
 
 categories_user_keys = ReplyKeyboardMarkup(keyboard=[
     [KeyboardButton(text='Женские 💇‍♀️'),
@@ -29,6 +31,7 @@ categories_user_keys = ReplyKeyboardMarkup(keyboard=[
     resize_keyboard=True, #  Меняем размер кнопок.
     input_field_placeholder='Выберите для кого услуга...'  # Подставляем placeholder.
 )
+
 
 info_keys = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='Группа ВКонтакте 📱', url=VK_LINK)],
@@ -55,12 +58,14 @@ profile_btn = InlineKeyboardMarkup(inline_keyboard=[
                           callback_data='delete_user')],
 ])
 
+
 # Кнопка запуска бота, после удаления профиля.
 start_btn = ReplyKeyboardMarkup(keyboard=[
     [KeyboardButton(text='Запустить бота')]
 ],
     resize_keyboard=True, #  Меняем размер кнопок.
 )
+
 
 comment_btn = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='Без комментария',
@@ -70,6 +75,11 @@ comment_btn = InlineKeyboardMarkup(inline_keyboard=[
 ])
 
 
+change_comment_btn = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='Отменить изменения',
+                          callback_data='cancle_comment_change')]
+])
+
 async def service_btn(service_id):
     """Выводи кнопки списка услуг."""
     keyboard = InlineKeyboardBuilder()
@@ -78,8 +88,7 @@ async def service_btn(service_id):
     keyboard.add(InlineKeyboardButton(text='Удалить',
                             callback_data=f'delete_service_{service_id}'))
     keyboard.add(InlineKeyboardButton(text='Изменить комментарий',
-                            callback_data='change_service_comment'))
-
+                            callback_data=f'change_comment_{service_id}'))
     return keyboard.adjust(2, 1).as_markup()
 
 
@@ -120,8 +129,15 @@ async def item_info(gender, item_id):
     keyboard = InlineKeyboardBuilder()
     keyboard.add(InlineKeyboardButton(text="Записаться ✏️",
                                 callback_data=f'record_{gender}_{item_id}'))
-    keyboard.add(InlineKeyboardButton(text='Назад ↪️',
+    if gender == 'female':
+        keyboard.add(InlineKeyboardButton(text='Назад ↪️',
                                 callback_data='to_female_categories'))
+    elif gender == 'male':
+        keyboard.add(InlineKeyboardButton(text='Назад ↪️',
+                                callback_data='to_male_categories'))
+    elif gender == 'child':
+        keyboard.add(InlineKeyboardButton(text='Назад ↪️',
+                                callback_data='to_child_categories'))
     return keyboard.adjust(1).as_markup()
 
 
@@ -144,11 +160,6 @@ async def male_items(category_id):
                                 callback_data='to_male_categories'))
     return keyboard.adjust(1).as_markup()
 
-# male_keys = InlineKeyboardMarkup(inline_keyboard=[
-#     [InlineKeyboardButton(text='Записаться ✏️', callback_data='male_record')],
-#     [InlineKeyboardButton(text='Назад ↪️', callback_data='to_male_categories')],
-# ])
-
 
 async def child_categories():
     all_categories = await get_child_categories()
@@ -167,8 +178,3 @@ async def child_items(category_id):
     keyboard.add(InlineKeyboardButton(text='Назад ↪️',
                                 callback_data='to_child_categories'))
     return keyboard.adjust(1).as_markup()
-
-# child_keys = InlineKeyboardMarkup(inline_keyboard=[
-#     [InlineKeyboardButton(text='Записаться ✏️', callback_data='child_record')],
-#     [InlineKeyboardButton(text='Назад ↪️', callback_data='to_child_categories')],
-# ])

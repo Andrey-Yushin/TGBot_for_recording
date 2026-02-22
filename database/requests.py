@@ -92,6 +92,18 @@ async def update_phone(tg_id, phone):
         return True
 
 
+async def update_comment(new_comment, id):
+    """Обновляет комментарий услуги."""
+    async with async_session() as session:  # Открываем сессию.
+        request = update(Services).where(Services.id == id).values(
+            user_comment=new_comment
+        )
+        await session.execute(request)  # Отправляем запрос.
+        await session.commit()  # Применяем изменения.
+        return True
+
+
+
 async def delete_user(tg_id):
     """Удаляет клиента."""
     async with async_session() as session:  # Открываем сессию.
@@ -166,6 +178,12 @@ async def get_male_item(item_id):
         return await session.scalar(select(MaleItem).where(
             MaleItem.id == item_id))
 
+async def get_male_category(category_id):
+    """Возвращает категорию по id."""
+    async with async_session() as session:  # Открываем сессию.
+        return await session.scalar(select(MaleCategory
+                            ).where(MaleCategory.id == category_id))
+
 
 async def get_child_categories():
     async with async_session() as session:  # Открываем сессию.
@@ -183,3 +201,9 @@ async def get_child_item(item_id):
         # Возвращаем описание выбранной услуги.
         return await session.scalar(select(ChildItem).where(
             ChildItem.id == item_id))
+
+async def get_child_category(category_id):
+    """Возвращает категорию по id."""
+    async with async_session() as session:  # Открываем сессию.
+        return await session.scalar(select(ChildCategory
+                            ).where(ChildCategory.id == category_id))

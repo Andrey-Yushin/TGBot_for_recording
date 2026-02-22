@@ -21,6 +21,8 @@ class Reg(StatesGroup):
 
 class Service(StatesGroup):
     comment = State()
+    update_comment = State()
+    service_id = State()
 
 @user_router.message(CommandStart())
 @user_router.message(F.text.lower() == 'запустить бота')
@@ -224,7 +226,7 @@ async def female_category(callback: CallbackQuery):
 
 
 @user_router.callback_query(F.data.startswith('female_item_'))
-async def female_category(callback: CallbackQuery):
+async def female_item(callback: CallbackQuery):
     """Выводит информацию об услуге."""
     item_id = int(callback.data.split('_')[2])
     item_data = await rq.get_female_item(item_id)
@@ -286,7 +288,7 @@ async def skip_comment(callback: CallbackQuery, state: FSMContext):
 
 @user_router.callback_query(F.data.startswith('record'))
 async def start_booking(callback: CallbackQuery, state: FSMContext):
-    """Начинает запись на услугу."""
+    """Запись услуги в базу."""
 
     item_id = int(callback.data.split('_')[2])
     gender = callback.data.split('_')[1]
@@ -296,7 +298,7 @@ async def start_booking(callback: CallbackQuery, state: FSMContext):
         item_data = await rq.get_female_item(item_id)
     elif gender == 'male':
         item_data = await rq.get_male_item(item_id)
-    else:
+    elif gender == 'child':
         item_data = await rq.get_child_item(item_id)
 
     # Сохраняем состояние в data
@@ -322,16 +324,20 @@ async def save_service(message: Message, state: FSMContext):
     data = await state.get_data()
     tg_id = message.from_user.id
 
+    # data - {'item_id': 1, 'gender': 'female',
+    # 'service_name': 'Подравнивание', 'price': 700,
+    # 'time': 'от 30 минут'}
+
     # Получаем полную информацию об услуге по сохраненному ID
     if data['gender'] == 'female':
         item_data = await rq.get_female_item(data['item_id'])
-        category = await rq.get_female_category(data['item_id'])
+        category = await rq.get_female_category(item_data.id)
     elif data['gender'] == 'male':
         item_data = await rq.get_male_item(data['item_id'])
-        category = await rq.get_male_category(data['item_id'])
-    else:
+        category = await rq.get_male_category(item_data.id)
+    elif data['gender'] == 'child':
         item_data = await rq.get_child_item(data['item_id'])
-        category = await rq.get_child_category(data['item_id'])
+        category = await rq.get_child_category(item_data.id)
 
     # Получаем информацию о пользователе
     user_info = await rq.get_user_info(tg_id)
@@ -350,6 +356,80 @@ async def save_service(message: Message, state: FSMContext):
 
     await message.answer("✅ Запись создана.")
     await state.clear()  # Очистка состояния.
+
+
+@user_router.callback_query(F.data.startswith('skip_comment'))
+async def skip_comment(callback: CallbackQuery, state: FSMContext):
+    """Запись услуги без комментария."""
+
+    # Получаем все данные из состояния
+    data = await state.get_data()
+
+    # Получаем информацию о пользователе
+    tg_id = callback.from_user.id
+    user_info = await rq.get_user_info(tg_id)
+
+    if data['gender'] == 'female':
+        category = await rq.get_female_category(data['item_id'])
+    elif data['gender'] == 'male':
+        category = await rq.get_male_category(data['item_id'])
+    elif data['gender'] == 'child':
+        category = await rq.get_child_category(data['item_id'])
+
+    # Сохраняем запись в БД с пустым комментарием
+    await rq.add_service(
+        tg_id=tg_id,
+        client_name=user_info.name,
+        client_phone=user_info.phone,
+        user_comment='Без комментария',  # Пустой комментарий
+        service_category=category.name,
+        service_item=data['service_name'],
+        price=data['price'],
+        time=data['time']
+    )
+
+    await callback.message.answer("✅ Запись сохранена.")
+    await callback.answer()  # Заглушка для кнопки.
+    await state.clear()  # Очистка состояния.
+
+
+@user_router.callback_query(F.data.startswith('change_comment_'))
+async def change_comment(callback: CallbackQuery, state: FSMContext):
+    """Обработка изменения комментария клиента."""
+    service_id = callback.data.split('_')[2]
+    # Сохраняем id услуги для изменения.
+    await state.update_data(service_id=service_id)
+
+    await callback.message.answer(
+        f"📝 Напишите в комментарий удобный день и время:",
+        reply_markup=uskey.change_comment_btn)
+    await state.set_state(Service.update_comment)
+    await callback.answer()
+
+@user_router.message(Service.update_comment)
+async def update_comment(message: Message, state: FSMContext):
+    """Обновляет номер клиента."""
+    # Сохраняем введеный номер
+    await state.update_data(new_comment=message.text)
+
+    data = await state.get_data()  # Достаем сохраненную информацию.
+    await rq.update_comment(data["new_comment"], data["service_id"])
+    await message.answer('✅ Комментарий изменен.')
+    await state.clear()
+
+@user_router.callback_query(F.data.startswith('cancle_comment_change'))
+async def comment_cancle(callback: CallbackQuery, state: FSMContext):
+    """Отмена изменения комментария."""
+    await state.clear()  # Очистка состояния.
+    await callback.message.answer("✅ Изменения отменены.")
+    await callback.answer()  # Заглушка для кнопки.
+
+@user_router.callback_query(F.data.startswith('service_cancle'))
+async def service_cancle(callback: CallbackQuery, state: FSMContext):
+    """Отменена записи."""
+    await state.clear()  # Очистка состояния.
+    await callback.message.answer("✅ Регистрация записи отменена.")
+    await callback.answer()  # Заглушка для кнопки.
 
 
 @user_router.message(F.text.lower() == 'мужские 💇‍♂️')
@@ -374,18 +454,20 @@ async def male_category(callback: CallbackQuery):
 
 
 @user_router.callback_query(F.data.startswith('male_item_'))
-async def male_category(callback: CallbackQuery):
-    item_data = await rq.get_male_item(callback.data.split('_')[2])
+async def male_item(callback: CallbackQuery):
+    """Выводит информацию об услуге."""
+    item_id = int(callback.data.split('_')[2])
+    item_data = await rq.get_male_item(item_id)
     await callback.answer()  # Заглушка для кнопки.
     if item_data.description == 'Пусто':  # Пустое описание не выводить.
         await callback.message.edit_text(f'💇‍♂️ Услуга: {item_data.name}\n'
-                f'🕒 Время: {item_data.time}\n💳 Цена: от {item_data.price} руб.',
-                                reply_markup=uskey.male_keys)
+            f'🕒 Время: {item_data.time}\n💳 Цена: от {item_data.price} руб.',
+                reply_markup=await uskey.item_info('male', item_id))
     else:
         await callback.message.edit_text(
-                f'💇‍♂️ Услуга: {item_data.name}\n📝 {item_data.description}\n'
-                f'🕒 Время: {item_data.time}\n💳 Цена: от {item_data.price} руб.',
-                                reply_markup=uskey.male_keys)
+            f'💇‍♂️ Услуга: {item_data.name}\n📝 {item_data.description}\n'
+            f'🕒 Время: {item_data.time}\n💳 Цена: от {item_data.price} руб.',
+                reply_markup=await uskey.item_info('male', item_id))
 
 
 @user_router.message(F.text.lower() == 'детские 👶')
@@ -410,18 +492,20 @@ async def child_category(callback: CallbackQuery):
 
 
 @user_router.callback_query(F.data.startswith('child_item_'))
-async def child_category(callback: CallbackQuery):
-    item_data = await rq.get_child_item(callback.data.split('_')[2])
+async def child_item(callback: CallbackQuery):
+    """Выводит информацию об услуге."""
+    item_id = int(callback.data.split('_')[2])
+    item_data = await rq.get_child_item(item_id)
     await callback.answer()  # Заглушка для кнопки.
     if item_data.description == 'Пусто':  # Пустое описание не выводить.
         await callback.message.edit_text(f'💇 Услуга: {item_data.name}\n'
-                f'🕒 Время: {item_data.time}\n💳 Цена: от {item_data.price} руб.',
-                                reply_markup=uskey.male_keys)
+            f'🕒 Время: {item_data.time}\n💳 Цена: от {item_data.price} руб.',
+                reply_markup=await uskey.item_info('child', item_id))
     else:
         await callback.message.edit_text(
                 f'💇 Услуга: {item_data.name}\n📝 {item_data.description}\n'
-                f'🕒 Время: {item_data.time}\n💳 Цена: от {item_data.price} руб.',
-                                reply_markup=uskey.male_keys)
+            f'🕒 Время: {item_data.time}\n💳 Цена: от {item_data.price} руб.',
+                reply_markup=await uskey.item_info('child', item_id))
 
 
 @user_router.message(F.text.lower() == 'акции 🎁')
