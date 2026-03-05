@@ -1,6 +1,6 @@
 
 from database.models import async_session
-from database.models import (User, Services,
+from database.models import (User, Services, Events,
                              FemaleCategory, FemaleItem,
                              MaleCategory, MaleItem,
                              ChildCategory, ChildItem)
@@ -38,7 +38,7 @@ async def get_user_info(tg_id):
 
 
 async def add_service(
-        tg_id, client_name, client_phone, user_comment,
+        tg_id, client_name, client_phone, user_comment, gender,
         service_category, service_item, price, time):
     """Добавляет услугу в базу."""
     async with async_session() as session:  # Открываем сессию.
@@ -48,6 +48,7 @@ async def add_service(
             client_name=client_name,
             client_phone=client_phone,
             user_comment=user_comment,
+            gender=gender,
             service_category=service_category,
             service_item=service_item,
             price = price,
@@ -128,6 +129,12 @@ async def get_user_services(tg_id):
     async with async_session() as session:  # Открываем сессию.
         return await session.scalars(select(Services).where(
             Services.tg_id == tg_id))
+
+
+async def get_events():
+    """Возвращает список акций."""
+    async with async_session() as session:  # Открываем сессию.
+        return await session.scalars(select(Events))
 
 
 async def get_service_info(service_id):
