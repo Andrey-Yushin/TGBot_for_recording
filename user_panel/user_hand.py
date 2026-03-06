@@ -74,12 +74,13 @@ async def cmd_start(message: Message):
     await message.answer('Привет!', reply_markup=uskey.main_user_keys)
 
 
+
 @user_router.callback_query(F.data == 'reg_usr')
 async def registration(callback: CallbackQuery, state: FSMContext):
     """Регистрирует клиента."""
     await state.set_state(Reg.name)
     await callback.message.answer('Введите ваше имя.')
-    await callback.answer()
+    await callback.answer()  # Заглушка для кнопки.
 
 
 @user_router.message(Reg.name)
@@ -128,7 +129,7 @@ async def change_name(callback: CallbackQuery, state: FSMContext):
     """Обработка изменения имени клиента."""
     await state.set_state(Reg.update_name)
     await callback.message.answer('Введите ваше имя:')
-    await callback.answer()
+    await callback.answer()  # Заглушка для кнопки.
 
 
 @user_router.message(Reg.update_name)
@@ -156,7 +157,7 @@ async def change_name(callback: CallbackQuery, state: FSMContext):
     """Обработка изменения номера клиента."""
     await state.set_state(Reg.update_phone)
     await callback.message.answer('Введите ваш номер:')
-    await callback.answer()
+    await callback.answer()  # Заглушка для кнопки.
 
 
 @user_router.message(Reg.update_phone)
@@ -182,11 +183,19 @@ async def reg_name(message: Message, state: FSMContext):
 @user_router.callback_query(F.data == 'delete_user')
 async def delete_user(callback: CallbackQuery, state: FSMContext):
     """Удаляет клиента."""
+
+    # Удаляем услуги клиента по id.
+    tg_id = callback.from_user.id
+    services = await rq.get_user_services(tg_id)
+    for service in services:
+        await rq.delete_service(service.id)
+
+    # Сообщаем клиенту об удалении профиля.
     await callback.message.answer('Ваш профиль удален.',
                             reply_markup=uskey.start_btn)
-    await callback.answer()
-    await rq.delete_user(callback.from_user.id)
-    await state.clear()
+    await callback.answer()  # Заглушка для кнопки.
+    await rq.delete_user(callback.from_user.id)  # Удаляем клиента из базы.
+    await state.clear()  # Очищаем состояние.
 
 
 @user_router.message(F.text.lower() == 'информация ℹ️')
@@ -232,9 +241,9 @@ async def service_list(message: Message):
     tg_id = message.from_user.id
     list_service = await rq.get_user_services(tg_id)
     if len(list_service.all()) == 0:
-        await message.answer('Ваш список услуг пуст 📋')
+        await message.answer('📋 Ваш список услуг пуст')
         return
-    await message.answer('Ваши услуги 📋',
+    await message.answer('📋 Ваши услуги',
                                 reply_markup=await uskey.user_services(tg_id))
 
 
@@ -242,7 +251,7 @@ async def service_list(message: Message):
 async def service_list(callback: CallbackQuery):
     """Выводит список зарегестрированных услуг клиента."""
     tg_id = callback.from_user.id
-    await callback.message.answer('Список услуг 📋',
+    await callback.message.answer('📋 Список услуг',
                                 reply_markup=await uskey.user_services(tg_id))
     await callback.answer()  # Заглушка для кнопки.
 
@@ -277,62 +286,23 @@ async def delete_user_service(callback: CallbackQuery):
 
     list_service = await rq.get_user_services(tg_id)
     if len(list_service.all()) == 0:
-        await callback.message.answer('Ваш список услуг пуст 📋')
+        await callback.message.answer('📋 Ваш список услуг пуст')
         return
-    await callback.message.answer('Список услуг 📋',
+    await callback.message.answer('📋 Список услуг',
                     reply_markup=await uskey.user_services(tg_id))
-
-
-@user_router.message(F.text.lower() == 'женские 💇‍♀️')
-async def females(message: Message):
-    """Выводит женские категории услуги."""
-    await message.answer('Для женщин',
-                                reply_markup=await uskey.female_categories())
-
-
-@user_router.callback_query(F.data.startswith('to_female_categories'))
-async def back_to_female_categories(callback: CallbackQuery):
-    """Выводит женские категории услуг."""
-    await callback.answer()  # Заглушка для кнопки.
-    await callback.message.edit_text('Для женщин',
-                                reply_markup=await uskey.female_categories())
-
-
-@user_router.callback_query(F.data.startswith('female_category_'))
-async def female_category(callback: CallbackQuery):
-    """Выводит женские услуги."""
-    await callback.answer()  # Заглушка для кнопки.
-    await callback.message.edit_text('Выберите услугу',
-        reply_markup=await uskey.female_items(callback.data.split('_')[2]))
-
-
-@user_router.callback_query(F.data.startswith('female_item_'))
-async def female_item(callback: CallbackQuery):
-    """Выводит информацию об услуге."""
-    item_id = int(callback.data.split('_')[2])
-    item_data = await rq.get_female_item(item_id)
-    time_data = time_format(item_data.time)
-    await callback.answer()  # Заглушка для кнопки.
-    if item_data.description == 'Пусто':  # Пустое описание не выводить.
-        await callback.message.edit_text(
-            f'💇‍♀️ <b>Услуга:</b> {item_data.name}\n'
-            f'🕒 <b>Время:</b> {time_data}\n'
-            f'💳 <b>Цена:</b> от {item_data.price} руб.',
-                reply_markup=await uskey.item_info('female', item_id),
-                parse_mode='HTML')
-    else:
-        await callback.message.edit_text(
-            f'💇‍♀️ <b>Услуга:</b> {item_data.name}\n'
-            f'📝{item_data.description}\n'
-            f'🕒 <b>Время:</b> {time_data}\n'
-            f'💳 <b>Цена:</b> от {item_data.price} руб.',
-                reply_markup=await uskey.item_info('female', item_id),
-                parse_mode='HTML')
 
 
 @user_router.callback_query(F.data.startswith('record'))
 async def start_booking(callback: CallbackQuery, state: FSMContext):
     """Запись услуги в базу."""
+
+    # Проверяем регистрацию пользователя.
+    tg_id = callback.from_user.id
+    user = await rq.get_user_info(tg_id)
+    if user.name is None:
+        await callback.message.answer('Для записи пройдите регистрацию.')
+        await registration(callback, state)
+        return
 
     item_id = int(callback.data.split('_')[2])
     gender = callback.data.split('_')[1]
@@ -405,7 +375,7 @@ async def save_service(message: Message, state: FSMContext):
         )
 
         await message.answer("✅ Запись сохранена.")
-        await message.answer('Список услуг 📋',
+        await message.answer('📋 Список услуг',
                                 reply_markup=await uskey.user_services(tg_id))
     else:
         await message.answer()  # Заглушка для кнопки.
@@ -456,7 +426,7 @@ async def skip_comment(callback: CallbackQuery, state: FSMContext):
         )
 
         await callback.message.answer("✅ Запись сохранена.")
-        await callback.message.answer('Список услуг 📋',
+        await callback.message.answer('📋 Список услуг',
                                 reply_markup=await uskey.user_services(tg_id))
     else:
         await callback.answer()  # Заглушка для кнопки.
@@ -493,9 +463,9 @@ async def update_comment(message: Message, state: FSMContext):
 
     if service_data:
         await message.answer(
-            f'📝{service_data.service_category}: {service_data.service_item}'
+            f'📝{service_data.service_category}: {service_data.service_item}\n'
             f'🕒 Время: {service_data.time} \n'
-            f'💳 Стоимость: {service_data.price}'
+            f'💳 Стоимость: {service_data.price}\n'
             f'✏️ Комментарий:\n {service_data.user_comment}',
             reply_markup= await uskey.service_btn(data["service_id"])
             )
@@ -518,6 +488,53 @@ async def service_cancle(callback: CallbackQuery, state: FSMContext):
     await callback.message.delete()  # Удаляем сообщение.
     await callback.message.answer("✅ Регистрация записи отменена.")
     await callback.answer()  # Заглушка для кнопки.
+
+
+@user_router.message(F.text.lower() == 'женские 💇‍♀️')
+async def females(message: Message):
+    """Выводит женские категории услуги."""
+    await message.answer('Для женщин',
+                                reply_markup=await uskey.female_categories())
+
+
+@user_router.callback_query(F.data.startswith('to_female_categories'))
+async def back_to_female_categories(callback: CallbackQuery):
+    """Выводит женские категории услуг."""
+    await callback.answer()  # Заглушка для кнопки.
+    await callback.message.edit_text('Для женщин',
+                                reply_markup=await uskey.female_categories())
+
+
+@user_router.callback_query(F.data.startswith('female_category_'))
+async def female_category(callback: CallbackQuery):
+    """Выводит женские услуги."""
+    await callback.answer()  # Заглушка для кнопки.
+    await callback.message.edit_text('Выберите услугу',
+        reply_markup=await uskey.female_items(callback.data.split('_')[2]))
+
+
+@user_router.callback_query(F.data.startswith('female_item_'))
+async def female_item(callback: CallbackQuery):
+    """Выводит информацию об услуге."""
+    item_id = int(callback.data.split('_')[2])
+    item_data = await rq.get_female_item(item_id)
+    time_data = time_format(item_data.time)
+    await callback.answer()  # Заглушка для кнопки.
+    if item_data.description == 'Пусто':  # Пустое описание не выводить.
+        await callback.message.edit_text(
+            f'💇‍♀️ <b>Услуга:</b> {item_data.name}\n'
+            f'🕒 <b>Время:</b> {time_data}\n'
+            f'💳 <b>Цена:</b> от {item_data.price} руб.',
+                reply_markup=await uskey.item_info('female', item_id),
+                parse_mode='HTML')
+    else:
+        await callback.message.edit_text(
+            f'💇‍♀️ <b>Услуга:</b> {item_data.name}\n'
+            f'📝{item_data.description}\n'
+            f'🕒 <b>Время:</b> {time_data}\n'
+            f'💳 <b>Цена:</b> от {item_data.price} руб.',
+                reply_markup=await uskey.item_info('female', item_id),
+                parse_mode='HTML')
 
 
 @user_router.message(F.text.lower() == 'мужские 💇‍♂️')
