@@ -1,6 +1,6 @@
 
 from database.models import async_session
-from database.models import (User, Services, Events,
+from database.models import (User, Services,
                              FemaleCategory, FemaleItem,
                              MaleCategory, MaleItem,
                              ChildCategory, ChildItem)
@@ -104,7 +104,6 @@ async def update_comment(new_comment, id):
         return True
 
 
-
 async def delete_user(tg_id):
     """Удаляет клиента."""
     async with async_session() as session:  # Открываем сессию.
@@ -113,6 +112,7 @@ async def delete_user(tg_id):
         await session.execute(request)  # Отправляем запрос.
         await session.commit()  # Применяем изменения.
         return True
+
 
 async def delete_service(service_id):
     """Удаляет запись от клиента."""
@@ -131,12 +131,6 @@ async def get_user_services(tg_id):
             Services.tg_id == tg_id))
 
 
-async def get_events():
-    """Возвращает список акций."""
-    async with async_session() as session:  # Открываем сессию.
-        return await session.scalars(select(Events))
-
-
 async def get_service_info(service_id):
     """Возвращает все записи."""
     async with async_session() as session:  # Открываем сессию.
@@ -149,17 +143,20 @@ async def get_female_categories():
     async with async_session() as session:  # Открываем сессию.
         return await session.scalars(select(FemaleCategory))
 
+
 async def get_female_items(category_id):
     """Возвращает все женские услуги."""
     async with async_session() as session:  # Открываем сессию.
         return await session.scalars(select(FemaleItem
                             ).where(FemaleItem.category == category_id))
 
+
 async def get_female_item(item_id):
     """Возвращает информацию по выбранной услуге."""
     async with async_session() as session:  # Открываем сессию.
         return await session.scalar(select(FemaleItem
                             ).where(FemaleItem.id == item_id))
+
 
 async def get_female_category(category_id):
     """Возвращает категорию по id."""
@@ -173,17 +170,20 @@ async def get_male_categories():
         # Возвращаем все мужские категории.
         return await session.scalars(select(MaleCategory))
 
+
 async def get_male_items(category_id):
     async with async_session() as session:  # Открываем сессию.
         # Возвращаем все мужские услуги.
         return await session.scalars(select(MaleItem).where(
             MaleItem.category == category_id))
 
+
 async def get_male_item(item_id):
     async with async_session() as session:  # Открываем сессию.
         # Возвращаем описание выбранной услуги.
         return await session.scalar(select(MaleItem).where(
             MaleItem.id == item_id))
+
 
 async def get_male_category(category_id):
     """Возвращает категорию по id."""
@@ -197,17 +197,20 @@ async def get_child_categories():
         # Возвращаем все детские категории.
         return await session.scalars(select(ChildCategory))
 
+
 async def get_child_items(category_id):
     async with async_session() as session:  # Открываем сессию.
         # Возвращаем все детские услуги.
         return await session.scalars(select(ChildItem).where(
             ChildItem.category == category_id))
 
+
 async def get_child_item(item_id):
     async with async_session() as session:  # Открываем сессию.
         # Возвращаем описание выбранной услуги.
         return await session.scalar(select(ChildItem).where(
             ChildItem.id == item_id))
+
 
 async def get_child_category(category_id):
     """Возвращает категорию по id."""

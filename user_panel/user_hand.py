@@ -189,6 +189,12 @@ async def delete_user(callback: CallbackQuery, state: FSMContext):
     await state.clear()
 
 
+@user_router.message(F.text.lower() == 'информация ℹ️')
+async def show_info(message: Message):
+    """Выводит информацию о мастере."""
+    await message.answer(info_string, reply_markup=uskey.info_keys)
+
+
 @user_router.message(F.text.lower() == 'на главную ↪️')
 async def to_main(message: Message):
     """Открывает главное меню."""
@@ -602,16 +608,3 @@ async def child_item(callback: CallbackQuery):
             f'💳 <b>Цена:</b> от {item_data.price} руб.',
                 reply_markup=await uskey.item_info('child', item_id),
                 parse_mode='HTML')
-
-
-@user_router.message(F.text.lower() == 'акции 🎁')
-async def events(message: Message):
-    """Выводит список акций."""
-    events_data = await rq.get_events()
-    await message.answer('Акции 🎁')
-
-
-@user_router.message(F.text.lower() == 'информация ℹ️')
-async def show_info(message: Message):
-    """Выводит информацию о мастере."""
-    await message.answer(info_string, reply_markup=uskey.info_keys)

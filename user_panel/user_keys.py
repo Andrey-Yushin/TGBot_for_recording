@@ -11,10 +11,10 @@ from database.requests import (get_female_categories, get_female_items,
 
 
 main_user_keys = ReplyKeyboardMarkup(keyboard=[
-    [KeyboardButton(text='Акции 🎁'),
+    [KeyboardButton(text='Мой профиль 👤'),
      KeyboardButton(text='Услуги 🛒')],
     [KeyboardButton(text='Информация ℹ️'),
-     KeyboardButton(text='Мой профиль 👤')],
+     KeyboardButton(text='Мои услуги 📋')]
 ],
     resize_keyboard=True, #  Меняем размер кнопок.
     input_field_placeholder='Выберите пункт меню...'  # Подставляем placeholder.

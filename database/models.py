@@ -54,18 +54,6 @@ class Services(Base):
     time: Mapped[str] = mapped_column(String(16), nullable=False)
 
 
-class Events(Base):
-    __tablename__ = 'events'  # Название таблицы.
-
-    id: Mapped[int] = mapped_column(primary_key=True)  # id акции.
-    # Название акции.
-    name: Mapped[str] = mapped_column(String(30), nullable=False)
-    description: Mapped[str] = mapped_column(String(100))  # Описание акции.
-    price: Mapped[int] = mapped_column(Integer, nullable=False)  # Цена акции.
-    # Время выполнения акции.
-    time: Mapped[str] = mapped_column(String(16), nullable=False)
-
-
 class FemaleCategory(Base):
     __tablename__ = 'female_categories'  # Название таблицы
 
