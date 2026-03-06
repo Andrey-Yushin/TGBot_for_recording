@@ -8,6 +8,7 @@ VK_LINK = os.getenv('VK_LINK')
 VIDEO_LINK=os.getenv('VIDEOLINK')
 YANDEX_MAPS = os.getenv('YANDEX_MAPS')
 TWOGIS = os.getenv('TWOGIS')
+ADMIN_ID = os.getenv('ADMIN_ID')
 
 main_text = (
     'Главное меню 🏠'
