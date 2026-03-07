@@ -1,14 +1,13 @@
 
 from aiogram import Router, F
-from aiogram.filters import CommandStart, Command
+from aiogram.filters import CommandStart
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
 import user_panel.user_keys as uskey
-from settings.config import info_string, main_text
+from settings.config import info_string, main_text, ADMIN_ID
 import database.requests as rq
-
 
 user_router = Router()
 
@@ -179,6 +178,7 @@ async def reg_name(message: Message, state: FSMContext):
         f'📌 <b>Профиль создан: {user_date_created}</b>',
         reply_markup=uskey.profile_btn,
         parse_mode='HTML')
+
 
 @user_router.callback_query(F.data == 'delete_user')
 async def delete_user(callback: CallbackQuery, state: FSMContext):

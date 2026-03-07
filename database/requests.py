@@ -7,6 +7,12 @@ from database.models import (User, Services,
 from sqlalchemy import select, update, delete
 
 
+async def get_users():
+    """Добавляет клиента в базу."""
+    async with async_session() as session:  # Открываем сессию.
+        users = await session.scalars(select(User))  # Запрашиваем id клиента.
+        return users
+
 async def set_user(tg_id):
     """Добавляет клиента в базу."""
     async with async_session() as session:  # Открываем сессию.

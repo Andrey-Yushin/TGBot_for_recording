@@ -10,9 +10,17 @@ from database.requests import (get_female_categories, get_female_items,
 
 
 admin_keys = ReplyKeyboardMarkup(keyboard=[
-    [KeyboardButton(text='Услуги 🛒'),
-     KeyboardButton(text='Клиенты')]
+    [KeyboardButton(text='Клиенты 👥'),
+     KeyboardButton(text='Мои услуги 🛒')],
+    [KeyboardButton(text='Создать объявление 📢'),
+     KeyboardButton(text='Записи 📝')]
 ],
     resize_keyboard=True, #  Меняем размер кнопок.
     input_field_placeholder='Выберите пункт меню...'  # Подставляем placeholder.
 )
+
+
+notification_keys = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='Отправить ✅', callback_data="send_notification"),
+     InlineKeyboardButton(text='Отмена ❌', callback_data="cancel_notification")]
+])
