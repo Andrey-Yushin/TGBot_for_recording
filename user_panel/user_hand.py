@@ -6,8 +6,9 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
 import user_panel.user_keys as uskey
-from settings.config import info_string, main_text, ADMIN_ID
+from settings.config import info_string, main_text
 import database.requests as rq
+
 
 user_router = Router()
 
@@ -71,7 +72,6 @@ async def cmd_start(message: Message):
     """Запускает бота."""
     await rq.set_user(message.from_user.id)
     await message.answer('Привет!', reply_markup=uskey.main_user_keys)
-
 
 
 @user_router.callback_query(F.data == 'reg_usr')
