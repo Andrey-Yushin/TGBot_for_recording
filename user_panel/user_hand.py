@@ -5,8 +5,9 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
+import admin_panel.admin_keys as adminkey
 import user_panel.user_keys as uskey
-from settings.config import info_string, main_text
+from settings.config import info_string, main_text, ADMIN_ID
 import database.requests as rq
 
 
@@ -70,8 +71,11 @@ def time_format(item_data):
 @user_router.message(F.text.lower() == 'запустить бота')
 async def cmd_start(message: Message):
     """Запускает бота."""
-    await rq.set_user(message.from_user.id)
-    await message.answer('Привет!', reply_markup=uskey.main_user_keys)
+    if message.from_user.id == int(ADMIN_ID):
+        await message.answer('Админ панель активна.', reply_markup=adminkey.admin_menu)
+    else:
+        await rq.set_user(message.from_user.id)
+        await message.answer('Привет!', reply_markup=uskey.main_user_keys)
 
 
 @user_router.callback_query(F.data == 'reg_usr')
