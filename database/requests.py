@@ -8,9 +8,9 @@ from sqlalchemy import select, update, delete
 
 
 async def get_users():
-    """Добавляет клиента в базу."""
+    """Возвращает список клиентов."""
     async with async_session() as session:  # Открываем сессию.
-        users = await session.scalars(select(User))  # Запрашиваем id клиента.
+        users = await session.scalars(select(User))  # Достаем клиентов из базы.
         return users
 
 
