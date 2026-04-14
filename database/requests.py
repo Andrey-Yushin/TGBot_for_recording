@@ -121,7 +121,7 @@ async def delete_user(tg_id):
         return True
 
 
-async def delete_service(service_id):
+async def delete_client_service(service_id):
     """Удаляет запись от клиента."""
     async with async_session() as session:  # Открываем сессию.
         # Обновляем данные клиента.

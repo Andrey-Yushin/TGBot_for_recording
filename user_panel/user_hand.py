@@ -192,7 +192,7 @@ async def delete_user(callback: CallbackQuery, state: FSMContext):
     tg_id = callback.from_user.id
     services = await rq.get_user_services(tg_id)
     for service in services:
-        await rq.delete_service(service.id)
+        await rq.delete_client_service(service.id)
 
     # Сообщаем клиенту об удалении профиля.
     await callback.message.answer('Ваш профиль удален.',
@@ -278,13 +278,13 @@ async def show_service(callback: CallbackQuery):
         await callback.message.answer('❌ Записи не существует.')
 
 
-@user_router.callback_query(F.data.startswith('delete_service_'))
+@user_router.callback_query(F.data.startswith('delete_client_service_'))
 async def delete_user_service(callback: CallbackQuery):
     """Удаляет услугу клиента."""
     tg_id = callback.from_user.id
-    service_id = callback.data.split('_')[2]
+    service_id = callback.data.split('_')[3]
 
-    await rq.delete_service(service_id)  # Удаляем услугу клиента из базы.
+    await rq.delete_client_service(service_id)  # Удаляем услугу клиента из базы.
     await callback.answer()  # Заглушка для кнопки.
     await callback.message.delete()  # Удаляем сообщение.
 
