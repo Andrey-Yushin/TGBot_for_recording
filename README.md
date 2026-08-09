@@ -27,3 +27,14 @@
 * **Установить зависимости requirements:** pip install -r requirements.txt
 
 * **Запустить main.py:** py main.py
+
+# Скриншоты
+
+| | |
+|---|---|
+| *Информация о боте* | *Услуги* |
+| <img src="./images/info.png" width="400" /> | <img src="./images/services.png" width="400" /> |
+| *Регистрация клиента* | *Услуги клиента* |
+| <img src="./images/regist.png" width="400" /> | <img src="./images/my_services.png" width="400" /> |
+| *Комментарий к услуге* | |
+| <img src="./images/comment_services.png" width="400" /> | |
